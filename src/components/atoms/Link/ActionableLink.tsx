@@ -2,7 +2,7 @@ import { setActiveLink } from '@/redux/features/openedChatsSlice';
 import OpenInNewIcon from '@mui/icons-material/OpenInNew';
 import PlayCircleOutlineIcon from '@mui/icons-material/PlayCircleOutline';
 import { Menu, MenuItem, Link as MuiLink } from '@mui/material';
-import { default as NextLink } from 'next/link';
+import NextLink from 'next/link';
 import React, { MouseEvent, useState } from 'react';
 import { useDispatch } from 'react-redux';
 
@@ -31,14 +31,19 @@ const ActionableLink: React.FC<ActionableLinkProps> = ({ href, children, sx }) =
   return (
     <>
       <MuiLink
-        href={href}
-        sx={{ cursor: 'pointer', textDecoration: 'underline', ...sx }}
-        onClick={handleClick}
         component={NextLink}
+        href={href}
+        onClick={handleClick}
+        underline="always"
+        sx={{ cursor: 'pointer', ...(sx ?? {}) }}
+        aria-haspopup="menu"
+        aria-expanded={Boolean(anchorEl) ? 'true' : undefined}
+        aria-controls="actionable-link-menu"
       >
         {children}
       </MuiLink>
       <Menu
+        id="actionable-link-menu"
         anchorEl={anchorEl}
         open={Boolean(anchorEl)}
         onClose={handleClose}

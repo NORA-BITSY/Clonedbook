@@ -55,6 +55,8 @@ import type { AppProps } from 'next/app';
 
 import { faFacebookMessenger, faGithub } from '@fortawesome/free-brands-svg-icons';
 
+import ErrorBoundary from '@/components/ErrorBoundary';
+import UploadQueueToast from '@/components/UploadQueueToast';
 import NavBar from '@/components/organisms/NavBar';
 import OpenedChatsPortal from '@/components/organisms/OpenedChatsPortal';
 import ThemeModeProvider from '@/design/ThemeModeProvider';
@@ -166,10 +168,13 @@ export default function MyApp(props: EmotionAppProps) {
         <ThemeModeProvider>
           <LocalizationProvider dateAdapter={AdapterDayjs}>
             <StoreProvider store={store}>
-              <NavBar />
-              <Component {...pageProps} />
-              <OpenedChatsPortal />
-              <Toaster position='bottom-right' richColors />
+              <ErrorBoundary>
+                <UploadQueueToast />
+                <NavBar />
+                <Component {...pageProps} />
+                <OpenedChatsPortal />
+                <Toaster position='bottom-right' richColors />
+              </ErrorBoundary>
             </StoreProvider>
           </LocalizationProvider>
         </ThemeModeProvider>

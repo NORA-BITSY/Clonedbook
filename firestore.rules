@@ -1,8 +1,32 @@
 rules_version = '2';
 service cloud.firestore {
   match /databases/{database}/documents {
-    match /{document=**} {
-      allow read, write;
+    function isSignedIn() { return request.auth != null; }
+    function isOwner(uid) { return request.auth != null && request.auth.uid == uid; }
+
+    // Users
+    match /users/{userId} {
+      allow read: if isSignedIn();                // or restrict to friends later
+      allow write: if isOwner(userId);
     }
+
+    // Public basic info (readable by signed-in users)
+    match /usersPublicData/{docId} {
+      allow read: if isSignedIn();
+      allow write: if false; // only via backend/admin
+    }
+
+    // Posts collection with privacy (public|friends|private)
+    match /posts/{postId} {
+      allow read: if isSignedIn() && (
+        resource.data.privacy == 'public' ||
+        (resource.data.privacy == 'friends' && request.auth.uid in resource.data.allowedViewers) ||
+        isOwner(resource.data.ownerId)
+      );
+      allow write: if isSignedIn() && isOwner(request.resource.data.ownerId);
+    }
+
+    // Default deny
+    match /{document=**} { allow read, write: if false; }
   }
 }

@@ -1,16 +1,26 @@
 /** @type {import('next').NextConfig} */
 
 // Set this to true to disable image optimization, false to enable it
-const DISABLE_IMAGE_OPTIMIZATION = true;
+const DISABLE_IMAGE_OPTIMIZATION = process.env.NODE_ENV === 'development';
 
 const nextConfig = {
-  reactStrictMode: false,
+  reactStrictMode: true,
+  swcMinify: true,
   compiler: {
     emotion: true,
+    removeConsole: process.env.NODE_ENV === 'production' ? {
+      exclude: ['error', 'warn']
+    } : false,
   },
   // Explicitly set environment variables
   env: {
     NEXT_PUBLIC_USE_EMULATOR: process.env.NEXT_PUBLIC_USE_EMULATOR || 'false',
+  },
+  poweredByHeader: false,
+  compress: true,
+  generateEtags: true,
+  httpAgentOptions: {
+    keepAlive: true,
   },
   images: {
     unoptimized: DISABLE_IMAGE_OPTIMIZATION,
