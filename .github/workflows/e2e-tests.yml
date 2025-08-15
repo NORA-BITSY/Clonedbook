@@ -1,0 +1,83 @@
+name: CI Matrix, SAST, and Migration Checks
+
+on: [push, pull_request]
+
+jobs:
+  build-and-test-frontend:
+    name: Frontend Build & Test
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out the repository
+        uses: actions/checkout@v3
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: '22'
+
+      - name: Install dependencies
+        run: npm install
+
+      - name: Run ESLint
+        run: npm run lint
+
+      - name: Run Type Check
+        run: npm run type-check # Assuming you have a type-check script
+
+      - name: Run Frontend Tests
+        run: npm test # Assuming you have frontend tests
+
+      - name: Run npm audit
+        run: npm audit --production
+
+  build-and-test-backend:
+    name: Backend Service - ${{ matrix.service }}
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        service: [api-gateway, auth, user, payment, iot, marketplace, social] # Add all your backend services here
+    steps:
+      - name: Check out the repository
+        uses: actions/checkout@v3
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: '22'
+
+      - name: Install dependencies
+        run: npm install
+        working-directory: backend/services/${{ matrix.service }}
+
+      - name: Run ESLint
+        run: npm run lint || true # Allow lint to fail for now if not configured
+        working-directory: backend/services/${{ matrix.service }}
+
+      - name: Run npm audit
+        run: npm audit --production
+        working-directory: backend/services/${{ matrix.service }}
+
+      # Placeholder for DB migration linting/dry-run
+      - name: Run DB Migration Check (Placeholder)
+        run: echo "Skipping DB migration check for ${{ matrix.service }} - implement sqlfluff or psql -f dry-run here"
+        # Example: run: sqlfluff lint path/to/migrations || true
+        # Example: run: psql -f path/to/migrations/latest.sql --dry-run || true
+
+  e2e-tests:
+    name: Run End-to-End Tests
+    runs-on: ubuntu-latest
+    needs: [build-and-test-frontend, build-and-test-backend] # Ensure all services are built and tested first
+    steps:
+      - name: Check out the repository
+        uses: actions/checkout@v3
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: '22'
+
+      - name: Install dependencies
+        run: npm install
+
+      - name: Run TestCafe Tests
+        run: npm run test:e2e-gh

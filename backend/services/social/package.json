@@ -1,0 +1,14 @@
+{
+  "name": "social-service",
+  "version": "1.0.0",
+  "description": "Social service with MongoDB integration",
+  "main": "index.js",
+  "scripts": {
+    "start": "node index.js"
+  },
+  "dependencies": {
+    "express": "^4.19.2",
+    "mongodb": "^6.7.0",
+    "zod": "^3.23.8"
+  }
+}
